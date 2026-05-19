@@ -22,7 +22,7 @@ io.on("connection", (socket) => {
         usernametosocket.set(Name, socket.id);
         socket.join(roomId);
         socket.emit('joined-room', { roomId });
-        socket.broadcast.to(roomId).emit("User Joined - ", { Name });
+        socket.broadcast.to(roomId).emit("user-joined - ", { Name });
     });
 });
 app.listen(8000, () => {
