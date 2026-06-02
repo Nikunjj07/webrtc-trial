@@ -14,6 +14,7 @@
     "@types/react-router-dom": "^5.3.3",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "react-player": "^3.4.0",
     "react-router-dom": "^7.15.0",
     "socket.io-client": "^4.8.3",
     "tailwindcss": "^4.3.0"
