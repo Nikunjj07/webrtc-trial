@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSocket } from "../providers/Socket"
 import { usePeer } from "../providers/Peer";
-import ReactPlayer from "react-player";
 
 export function Lobby(){
 
     const peerContext = usePeer();
     const { socket } = useSocket();
     if (!socket || !peerContext) return null;
-    const { peer, createOffer, createAnswer, setRemoteAnswer } = peerContext;
+    const { peer, createOffer, createAnswer, setRemoteAnswer, sendStream, remoteStream } = peerContext;
     const [myStream, setMyStream] = useState<MediaStream | null>();
+    
     const videoRef = useRef<HTMLVideoElement | null>(null);
+    const remoteRef = useRef<HTMLVideoElement | null>(null);
 
     const handleIncomingCall = useCallback(async(data : any)=>{
         const { from, offer} = data;
@@ -34,7 +35,10 @@ export function Lobby(){
     },[])
 
     const getUserMediaStream = useCallback(async()=>{
-        const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true})
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: true
+        });
         setMyStream(stream);
     },[])
 
@@ -60,11 +64,18 @@ export function Lobby(){
         }
     }, [myStream]);
 
+    useEffect(() => {
+        if (remoteRef.current && remoteStream) {
+        remoteRef.current.srcObject = remoteStream;
+        }
+    }, [remoteStream]);
+
     return <div>
         Room
         WebRTC Practice
         <div className="rounded-xl bg-white px-6 py-8 shadow-sm">
             <video className="rounded-3xl bg-white shadow-sm" muted autoPlay playsInline ref={videoRef} />
+            <video className="rounded-3xl bg-white shadow-sm"  autoPlay playsInline ref={remoteRef} />
         </div>
     </div>
 }
