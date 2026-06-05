@@ -21,9 +21,10 @@ io.on("connection", (socket)=>{
         console.log("room joined!") 
         usernameToSocket.set(Name, socket.id);
         socketToUsername.set(socket.id, Name);
+        const remoteSocketId = socket.id;
         socket.join(roomId);
         socket.emit('joined-room', {roomId})
-        socket.broadcast.to(roomId).emit("user-joined", {Name});
+        socket.broadcast.to(roomId).emit("user-joined", {Name, from: remoteSocketId});
     })
 
     socket.on("call-user",(data)=>{
@@ -37,6 +38,19 @@ io.on("connection", (socket)=>{
         const {from, answer} = data;
         const socketId = usernameToSocket.get(from);
         socket.to(socketId).emit("call-accepted",{ answer })
+    })
+
+    socket.on("nego-needed",(data)=>{
+        const {offer, to} = data;
+        socket.to(to).emit("peer-nego-needed",{
+            from: socket.id,
+            offer
+        })
+    })
+
+    socket.on("peer-nego-done",(data)=>{
+        const {to, ans} = data;
+        socket.to(to).emit("peer-nego-final",{from: socket.id, ans})
     })
 })
 

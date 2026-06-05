@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
+import { createContext, useContext, useMemo } from "react"
 import type { ReactNode } from "react"
 
 interface PeerProviderProps {
@@ -11,7 +11,6 @@ interface PeerContextValue {
     createAnswer: (offer: any) => Promise<RTCSessionDescriptionInit>,
     setRemoteAnswer: (ans: any) => Promise<void>,
     sendStream: (stream: any) => Promise<void>,
-    remoteStream: MediaStream | null | undefined
 }
 
 export const usePeer = ()=> useContext(PeerContext)
@@ -19,7 +18,6 @@ export const usePeer = ()=> useContext(PeerContext)
 const PeerContext = createContext<PeerContextValue | null>(null)
 
 export const PeerProvider = (props: PeerProviderProps)=>{
-    const [remoteStream, setRemoteStream] = useState<MediaStream | null>()
     const peer = useMemo(()=>{
         return new RTCPeerConnection({
             iceServers:[
@@ -56,20 +54,7 @@ export const PeerProvider = (props: PeerProviderProps)=>{
         }
     }
 
-    const handleTrackEvent = useCallback(async(ev:any)=> {
-        const streams = ev.streams;
-        setRemoteStream(streams[0]);
-    },[])
-
-    useEffect(()=>{
-        peer.addEventListener("track",handleTrackEvent);
-
-        return ()=>{
-            peer.removeEventListener("track", handleTrackEvent)
-        }
-    },[peer])
-
-    return <PeerContext.Provider value={{peer , createOffer, createAnswer, setRemoteAnswer, sendStream, remoteStream}}>
+    return <PeerContext.Provider value={{peer , createOffer, createAnswer, setRemoteAnswer, sendStream}}>
         {props.children}
     </PeerContext.Provider>
 }
